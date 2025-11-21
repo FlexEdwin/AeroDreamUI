@@ -1,229 +1,384 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Proyecto B787 Escalafón</title>
+    <title>Certificación Técnica | Plataforma de Estudio</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Alpine & Styles -->
     <script type="module" src="/src/app.js"></script>
   </head>
   <body x-data="{ 
-    currentView: 'menu', 
-    systemTime: new Date().toLocaleTimeString('en-US', {hour12: false}),
-    activeATA: null,
+    view: 'login', // login, dashboard, exam, results
     
-    // Mock Data for Demo
-    menuItems: [
-      { id: 'general', title: 'GENERAL', subtitle: 'Familiarización', icon: 'info', size: 'large', color: 'cyan' },
-      { id: 'ata', title: 'ATA CHAPTERS', subtitle: 'Sistemas', icon: 'grid', size: 'medium', color: 'blue' },
-      { id: 'faults', title: 'FALLOS', subtitle: 'Troubleshooting', icon: 'alert', size: 'medium', color: 'amber' },
-      { id: 'progress', title: 'PROGRESO', subtitle: 'Estadísticas', icon: 'chart', size: 'small', color: 'green' },
-      { id: 'settings', title: 'CONFIG', subtitle: 'Sistema', icon: 'settings', size: 'small', color: 'slate' }
+    user: {
+      name: 'Alejandro M.',
+      role: 'Técnico Nivel 2',
+      avatar: 'AM'
+    },
+
+    stats: {
+      questionsMastered: 843,
+      globalAccuracy: 92,
+      streakDays: 12
+    },
+
+    selectedCategory: null,
+    
+    exam: {
+      currentQuestionIndex: 0,
+      totalQuestions: 10,
+      answers: {}, // { questionId: optionIndex }
+      isFinished: false
+    },
+
+    // Mock Data
+    categories: [
+      { id: 'ata24', name: 'ATA 24: Electrical Power', progress: 75, total: 120 },
+      { id: 'ata29', name: 'ATA 29: Hydraulic Power', progress: 45, total: 90 },
+      { id: 'ata27', name: 'ATA 27: Flight Controls', progress: 90, total: 150 },
+      { id: 'ata32', name: 'ATA 32: Landing Gear', progress: 10, total: 80 },
     ],
-    
-    questions: [
-      { 
-        id: 1, 
-        text: '¿Cuál es la fuente principal de energía eléctrica en vuelo normal?', 
-        options: ['Generadores VFSG', 'Batería Principal', 'APU', 'RAT'],
-        correct: 0
+
+    currentQuestions: [
+      {
+        id: 1,
+        text: 'En un sistema hidráulico con presión de 3000 psi, ¿qué componente es responsable de mantener la presión dentro del rango operativo normal si la bomba falla?',
+        options: [
+          'Válvula de alivio térmico',
+          'Acumulador del sistema',
+          'Válvula de prioridad',
+          'Bomba eléctrica auxiliar (ACMP)'
+        ],
+        correct: 3
+      },
+      {
+        id: 2,
+        text: '¿Qué bus eléctrico alimenta los sistemas esenciales en caso de pérdida total de generadores principales?',
+        options: [
+          'Utility Bus',
+          'Ground Service Bus',
+          'Hot Battery Bus / Standby Bus',
+          'Main Bus L'
+        ],
+        correct: 2
       }
     ],
-    
-    init() {
-      setInterval(() => {
-        this.systemTime = new Date().toLocaleTimeString('en-US', {hour12: false});
-      }, 1000);
+
+    // Actions
+    login() {
+      // Simulate login delay
+      setTimeout(() => {
+        this.view = 'dashboard';
+      }, 500);
+    },
+
+    startExam(categoryId) {
+      this.selectedCategory = categoryId;
+      this.exam.currentQuestionIndex = 0;
+      this.exam.answers = {};
+      this.exam.isFinished = false;
+      this.view = 'exam';
+    },
+
+    selectAnswer(optionIndex) {
+      const qId = this.currentQuestions[this.exam.currentQuestionIndex].id;
+      this.exam.answers[qId] = optionIndex;
+    },
+
+    nextQuestion() {
+      if (this.exam.currentQuestionIndex < this.currentQuestions.length - 1) {
+        this.exam.currentQuestionIndex++;
+      } else {
+        this.finishExam();
+      }
+    },
+
+    finishExam() {
+      this.exam.isFinished = true;
+      this.view = 'results';
+    },
+
+    calculateScore() {
+      let correct = 0;
+      this.currentQuestions.forEach((q) => {
+        if (this.exam.answers[q.id] === q.correct) correct++;
+      });
+      return Math.round((correct / this.currentQuestions.length) * 100);
     }
   }">
 
-    <!-- TOP EICAS BAR -->
-    <header class="fixed top-0 w-full h-14 bg-slate-900/90 border-b border-white/10 flex items-center justify-between px-6 z-50 backdrop-blur-sm">
-      <div class="flex items-center gap-4">
-        <div class="text-cyan-400 font-bold font-display text-lg tracking-widest">BOEING 787</div>
-        <div class="h-4 w-[1px] bg-white/20"></div>
-        <div class="text-xs text-slate-400 tracking-widest">MAINTENANCE TRAINING SYSTEM</div>
-      </div>
+    <!-- VIEW: LOGIN -->
+    <div x-show="view === 'login'" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="flex-1 flex flex-col items-center justify-center p-4 min-h-screen">
       
-      <div class="flex items-center gap-6 font-mono text-sm">
-        <div class="flex items-center gap-2 text-slate-400">
-          <span>FLT:</span>
-          <span class="text-white">NO-ACTIVE</span>
-        </div>
-        <div class="flex items-center gap-2 text-slate-400">
-          <span>UTC:</span>
-          <span class="text-cyan-400" x-text="systemTime">00:00:00</span>
-        </div>
-        <div class="px-2 py-1 rounded border border-green-500/30 bg-green-500/10 text-green-400 text-xs font-bold animate-pulse">
-          SYSTEM OK
-        </div>
-      </div>
-    </header>
-
-    <!-- MAIN CONTENT AREA -->
-    <main class="pt-20 pb-10 px-4 md:px-8 h-screen overflow-y-auto scrollbar-hide flex flex-col">
-      
-      <!-- VIEW: MENU (BENTO GRID) -->
-      <div x-show="currentView === 'menu'" 
-           x-transition:enter="transition ease-out duration-300"
-           x-transition:enter-start="opacity-0 scale-95"
-           x-transition:enter-end="opacity-100 scale-100"
-           class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
-        
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-10">
         <div class="mb-8 text-center">
-          <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-2 tracking-tight">SELECCIONA MÓDULO</h1>
-          <p class="text-slate-400 font-mono">B787-8 / B787-9 DREAMLINER COURSEWARE</p>
+          <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">TechCert Pro</h1>
+          <p class="text-slate-500 mt-2 text-sm">Acceda a su portal de certificación</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-3 gap-4 h-[600px]">
+        <form @submit.prevent="login" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Correo Corporativo</label>
+            <input type="email" placeholder="nombre@empresa.com" class="input-field" required>
+          </div>
           
-          <!-- GENERAL (Large Item) -->
-          <button @click="currentView = 'quiz'" 
-                  class="group relative md:col-span-2 md:row-span-3 glass-panel rounded-2xl p-8 text-left transition-all duration-300 hover:bg-slate-800/50 hover:border-cyan-500/50 hover:box-glow flex flex-col justify-between overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-               <!-- Decorative Icon -->
-               <svg class="w-48 h-48 text-cyan-500" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Contraseña</label>
+            <input type="password" placeholder="••••••••" class="input-field" required>
+          </div>
+
+          <div class="flex items-center justify-between text-sm">
+            <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
+              <input type="checkbox" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+              <span>Recordarme</span>
+            </label>
+            <a href="#" class="text-indigo-600 hover:text-indigo-700 font-medium">¿Olvidó su contraseña?</a>
+          </div>
+
+          <button type="submit" class="w-full btn-primary py-3 shadow-lg shadow-indigo-500/20">
+            Iniciar Sesión
+          </button>
+        </form>
+        
+        <div class="mt-8 text-center text-xs text-slate-400">
+          &copy; 2025 TechCert Training Systems. Enterprise Edition.
+        </div>
+      </div>
+    </div>
+
+    <!-- APP SHELL (DASHBOARD, EXAM, RESULTS) -->
+    <div x-show="view !== 'login'" class="flex flex-col min-h-screen">
+      
+      <!-- Navbar -->
+      <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex items-center gap-8">
+              <div class="flex items-center gap-2 cursor-pointer" @click="view = 'dashboard'">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 tracking-tight">TechCert</span>
+              </div>
+              
+              <div class="hidden md:flex items-center gap-6">
+                <a href="#" @click.prevent="view = 'dashboard'" class="nav-link" :class="view === 'dashboard' ? '!text-indigo-600 !font-semibold' : ''">Dashboard</a>
+                <a href="#" class="nav-link">Librería</a>
+                <a href="#" class="nav-link">Mis Resultados</a>
+              </div>
             </div>
-            
+
+            <div class="flex items-center gap-4">
+              <div class="hidden sm:flex flex-col items-end mr-2">
+                <span class="text-sm font-medium text-slate-900" x-text="user.name">User</span>
+                <span class="text-xs text-slate-500" x-text="user.role">Role</span>
+              </div>
+              <div class="h-9 w-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-medium text-sm">
+                <span x-text="user.avatar"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- MAIN CONTENT CONTAINER -->
+      <main class="flex-1 bg-slate-50">
+        
+        <!-- VIEW: DASHBOARD -->
+        <div x-show="view === 'dashboard'" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+          
+          <!-- Welcome Header -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <span class="inline-block px-2 py-1 rounded bg-cyan-950 border border-cyan-500/30 text-cyan-400 text-xs font-mono mb-4">MOD-01</span>
-              <h2 class="text-3xl font-display font-bold text-white group-hover:text-cyan-400 transition-colors">GENERAL FAM</h2>
+              <h2 class="text-2xl font-bold text-slate-900">Resumen de Estudio</h2>
+              <p class="text-slate-500 mt-1">Continúa donde lo dejaste ayer.</p>
             </div>
             
-            <div class="relative z-10">
-              <p class="text-slate-400 mb-4 max-w-xs text-sm">Visión general de sistemas, dimensiones, zonas y prácticas de seguridad del B787.</p>
-              <div class="flex items-center gap-2 text-cyan-400 font-mono text-sm font-bold group-hover:translate-x-2 transition-transform">
-                <span>INICIAR MÓDULO</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <div class="flex gap-3">
+              <button class="btn-secondary flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                Crear Nota
+              </button>
+              <button class="btn-primary flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Repaso Rápido
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card-base p-5 flex items-center gap-4">
+              <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-900" x-text="stats.questionsMastered">0</div>
+                <div class="text-sm text-slate-500">Preguntas Dominadas</div>
+              </div>
+            </div>
+
+            <div class="card-base p-5 flex items-center gap-4">
+              <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-900" x-text="stats.globalAccuracy + '%'">0%</div>
+                <div class="text-sm text-slate-500">Precisión Global</div>
+              </div>
+            </div>
+
+            <div class="card-base p-5 flex items-center gap-4">
+              <div class="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-900" x-text="stats.streakDays">0</div>
+                <div class="text-sm text-slate-500">Días en Racha</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories / Modules -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-slate-900">Módulos de Aprendizaje</h3>
+              <button class="text-sm text-indigo-600 font-medium hover:text-indigo-700">Ver todos</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <template x-for="cat in categories" :key="cat.id">
+                <div @click="startExam(cat.id)" class="card-base p-5 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all group relative overflow-hidden">
+                  <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-slate-100 rounded-md text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                    <div class="text-xs font-medium bg-slate-100 px-2 py-1 rounded text-slate-600" x-text="cat.progress + '%'"></div>
+                  </div>
+                  
+                  <h4 class="text-base font-bold text-slate-900 mb-1 group-hover:text-indigo-700 transition-colors" x-text="cat.name"></h4>
+                  <p class="text-sm text-slate-500 mb-4" x-text="cat.total + ' Preguntas'"></p>
+                  
+                  <!-- Progress Bar -->
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" :style="'width: ' + cat.progress + '%'"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: EXAM INTERFACE -->
+        <div x-show="view === 'exam'" x-cloak class="max-w-3xl mx-auto px-4 sm:px-6 py-8 md:py-12 min-h-[calc(100vh-64px)] flex flex-col">
+          
+          <!-- Exam Header -->
+          <div class="mb-8">
+            <div class="flex justify-between items-center text-sm text-slate-500 mb-3 font-medium">
+              <span x-text="'Pregunta ' + (exam.currentQuestionIndex + 1) + ' de ' + currentQuestions.length"></span>
+              <span class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">ATA 24 - Electrical</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2">
+              <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-out" 
+                   :style="'width: ' + (((exam.currentQuestionIndex + 1) / currentQuestions.length) * 100) + '%'"></div>
+            </div>
+          </div>
+
+          <!-- Question Card -->
+          <div class="flex-1 flex flex-col">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-900 leading-tight mb-8" 
+                x-text="currentQuestions[exam.currentQuestionIndex].text">
+            </h2>
+
+            <div class="space-y-3">
+              <template x-for="(option, index) in currentQuestions[exam.currentQuestionIndex].options">
+                <button @click="selectAnswer(index)"
+                        class="w-full text-left p-5 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 group relative"
+                        :class="exam.answers[currentQuestions[exam.currentQuestionIndex].id] === index 
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-900' 
+                          : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50'">
+                  
+                  <!-- Radio Circle Indicator -->
+                  <div class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                       :class="exam.answers[currentQuestions[exam.currentQuestionIndex].id] === index 
+                          ? 'border-indigo-600 bg-indigo-600' 
+                          : 'border-slate-300 group-hover:border-indigo-300'">
+                     <div class="w-2.5 h-2.5 bg-white rounded-full opacity-0 transition-opacity"
+                          :class="exam.answers[currentQuestions[exam.currentQuestionIndex].id] === index ? 'opacity-100' : ''"></div>
+                  </div>
+                  
+                  <span class="text-base font-medium" x-text="option"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Navigation Footer -->
+          <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center">
+            <button @click="exam.currentQuestionIndex > 0 ? exam.currentQuestionIndex-- : null" 
+                    class="text-slate-500 hover:text-slate-800 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+                    :disabled="exam.currentQuestionIndex === 0">
+              Anterior
+            </button>
+            
+            <button @click="nextQuestion()" 
+                    class="btn-primary px-8 shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:shadow-none"
+                    :disabled="exam.answers[currentQuestions[exam.currentQuestionIndex].id] === undefined">
+              <span x-text="exam.currentQuestionIndex === currentQuestions.length - 1 ? 'Finalizar Examen' : 'Siguiente'"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW: RESULTS -->
+        <div x-show="view === 'results'" x-cloak class="max-w-2xl mx-auto px-4 py-12 text-center">
+          
+          <div class="card-base p-10 mb-8">
+            <div class="w-24 h-24 mx-auto mb-6 relative flex items-center justify-center">
+              <svg class="w-full h-full transform -rotate-90 text-slate-100" viewBox="0 0 36 36">
+                <path stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+              </svg>
+              <svg class="w-full h-full absolute top-0 left-0 transform -rotate-90 text-indigo-600" viewBox="0 0 36 36">
+                <path :stroke-dasharray="calculateScore() + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+              </svg>
+              <div class="absolute text-2xl font-bold text-slate-900" x-text="calculateScore() + '%'"></div>
+            </div>
+
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">¡Examen Completado!</h2>
+            <p class="text-slate-500 mb-8">Has demostrado un buen entendimiento de los sistemas hidráulicos.</p>
+
+            <div class="grid grid-cols-2 gap-4 text-left mb-8">
+              <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                <div class="text-xs text-slate-500 uppercase font-semibold tracking-wider mb-1">Aciertos</div>
+                <div class="text-xl font-bold text-emerald-600">2 / 2</div>
+              </div>
+              <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                <div class="text-xs text-slate-500 uppercase font-semibold tracking-wider mb-1">Tiempo</div>
+                <div class="text-xl font-bold text-slate-700">04:12</div>
               </div>
             </div>
             
-            <!-- Tech Decoration lines -->
-            <div class="absolute bottom-8 right-8 flex gap-1">
-              <div class="w-1 h-1 bg-cyan-500 rounded-full"></div>
-              <div class="w-1 h-1 bg-cyan-500/50 rounded-full"></div>
-              <div class="w-1 h-1 bg-cyan-500/20 rounded-full"></div>
-            </div>
-          </button>
-
-          <!-- ATA CHAPTERS (Medium Item) -->
-          <button @click="currentView = 'quiz'" 
-                  class="group md:col-span-2 md:row-span-2 glass-panel rounded-2xl p-6 text-left transition-all duration-300 hover:bg-slate-800/50 hover:border-blue-500/50 hover:box-glow relative overflow-hidden">
-            <div class="absolute -bottom-4 -right-4 opacity-5 group-hover:opacity-10 transition-opacity">
-               <svg class="w-40 h-40 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-            </div>
-
-            <span class="inline-block px-2 py-1 rounded bg-blue-950 border border-blue-500/30 text-blue-400 text-xs font-mono mb-3">SYS-ATA</span>
-            <h2 class="text-2xl font-display font-bold text-white group-hover:text-blue-400 transition-colors mb-2">ATA CHAPTERS</h2>
-            <p class="text-slate-400 text-xs mb-4">ATA 21, 24, 27, 29, 32, 42...</p>
-            
-            <div class="grid grid-cols-3 gap-2 mt-4 opacity-60">
-              <div class="h-1 bg-blue-500 rounded w-full"></div>
-              <div class="h-1 bg-blue-500 rounded w-2/3"></div>
-              <div class="h-1 bg-blue-500 rounded w-full"></div>
-            </div>
-          </button>
-
-          <!-- FAULTS (Medium Item) -->
-          <button class="group md:col-span-1 md:row-span-1 glass-panel rounded-2xl p-6 text-left transition-all duration-300 hover:bg-slate-800/50 hover:border-amber-500/50 hover:box-glow border-l-4 border-l-amber-500">
-            <div class="flex justify-between items-start mb-2">
-              <span class="text-amber-500 font-mono text-xs font-bold">DIAGNOSTICS</span>
-              <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-            <h2 class="text-xl font-display font-bold text-white mb-1">FALLOS</h2>
-            <p class="text-slate-500 text-xs">Troubleshooting simulation</p>
-          </button>
-
-          <!-- PROGRESS (Small Item) -->
-          <button class="group md:col-span-1 md:row-span-1 glass-panel rounded-2xl p-6 text-left transition-all duration-300 hover:bg-slate-800/50 hover:border-green-500/50 hover:box-glow">
-             <div class="flex justify-between items-start mb-2">
-              <span class="text-green-500 font-mono text-xs font-bold">USER DATA</span>
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            </div>
-            <h2 class="text-xl font-display font-bold text-white mb-1">85%</h2>
-            <p class="text-slate-500 text-xs">Completion Rate</p>
-          </button>
-
-        </div>
-      </div>
-
-      <!-- VIEW: QUIZ (HUD STYLE) -->
-      <div x-show="currentView === 'quiz'" 
-           x-cloak
-           class="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full">
-        
-        <!-- HUD Header -->
-        <div class="w-full flex justify-between items-end mb-4 border-b border-white/10 pb-2">
-          <div>
-             <button @click="currentView = 'menu'" class="text-slate-400 hover:text-white flex items-center gap-2 text-sm font-mono transition-colors">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-               BACK TO MENU
-             </button>
-          </div>
-          <div class="text-right">
-            <div class="text-cyan-400 font-mono text-xs">ACTIVE MODE</div>
-            <div class="text-white font-display text-xl tracking-wider">ATA 24 - ELECTRICAL</div>
-          </div>
-        </div>
-
-        <!-- HUD Card -->
-        <div class="w-full glass-panel hud-border p-8 md:p-12 relative">
-          
-          <!-- Decorative HUD lines -->
-          <div class="absolute top-1/2 left-4 w-1 h-12 bg-white/10 rounded-full"></div>
-          <div class="absolute top-1/2 right-4 w-1 h-12 bg-white/10 rounded-full"></div>
-
-          <!-- Question Header -->
-          <div class="flex justify-between items-center mb-8">
-             <span class="font-mono text-cyan-500 text-sm border border-cyan-500/30 px-2 py-0.5 rounded bg-cyan-950/30">Q-01 / 10</span>
-             <span class="font-mono text-slate-500 text-xs">DIFFICULTY: LVL 2</span>
-          </div>
-
-          <!-- Question Text -->
-          <h3 class="text-2xl md:text-3xl font-display text-white mb-10 leading-relaxed">
-            ¿Cuál es la fuente principal de energía eléctrica durante el vuelo normal en el B787?
-          </h3>
-
-          <!-- Options Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <template x-for="(opt, index) in ['Generadores VFSG (Variable Frequency Starter Generator)', 'Batería Principal y APU', 'Ram Air Turbine (RAT)', 'IDG (Integrated Drive Generator)']">
-              <button class="relative p-4 border border-white/10 bg-slate-800/30 hover:bg-cyan-900/20 hover:border-cyan-400/50 transition-all duration-200 text-left group overflow-hidden">
-                <!-- Hover sweep effect -->
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                
-                <div class="flex items-center gap-4 relative z-10">
-                  <div class="w-8 h-8 flex items-center justify-center border border-slate-600 rounded text-slate-400 font-mono text-sm group-hover:border-cyan-400 group-hover:text-cyan-400 transition-colors">
-                    <span x-text="['A','B','C','D'][index]"></span>
-                  </div>
-                  <span class="text-slate-300 font-mono text-sm group-hover:text-white transition-colors" x-text="opt"></span>
-                </div>
-              </button>
-            </template>
-          </div>
-
-          <!-- Bottom Controls -->
-          <div class="mt-8 flex justify-end pt-6 border-t border-white/5">
-            <button class="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-sm font-bold py-3 px-8 rounded shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all flex items-center gap-2">
-              <span>CONFIRM SELECTION</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <button @click="view = 'dashboard'" class="w-full btn-secondary">
+              Volver al Dashboard
             </button>
           </div>
 
         </div>
 
-      </div>
-    </main>
-
-    <!-- Background Grid/Map Overlay -->
-    <div class="fixed inset-0 pointer-events-none z-0 opacity-20" 
-         style="background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px;">
+      </main>
     </div>
-    
+
   </body>
 </html>
