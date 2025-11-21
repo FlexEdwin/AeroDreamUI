@@ -70,9 +70,26 @@
       }
     ],
 
+    loginForm: {
+      email: '',
+      password: ''
+    },
+
     // Actions
     login() {
-      // Simulate login delay
+      // Simulate login check
+      if (this.loginForm.email === 'admin@techcert.com' && this.loginForm.password === 'admin123') {
+        this.user = { name: 'Alejandro M.', role: 'Técnico Nivel 2', avatar: 'AM' };
+        setTimeout(() => {
+          this.view = 'dashboard';
+        }, 500);
+      } else {
+        alert('Credenciales incorrectas. (Usuario: admin@techcert.com / Pass: admin123)');
+      }
+    },
+
+    loginAsGuest() {
+      this.user = { name: 'Invitado', role: 'Estudiante', avatar: 'G' };
       setTimeout(() => {
         this.view = 'dashboard';
       }, 500);
@@ -132,12 +149,12 @@
         <form @submit.prevent="login" class="space-y-5">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1.5">Correo Corporativo</label>
-            <input type="email" placeholder="nombre@empresa.com" class="input-field" required>
+            <input type="email" x-model="loginForm.email" placeholder="nombre@empresa.com" class="input-field" required>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1.5">Contraseña</label>
-            <input type="password" placeholder="••••••••" class="input-field" required>
+            <input type="password" x-model="loginForm.password" placeholder="••••••••" class="input-field" required>
           </div>
 
           <div class="flex items-center justify-between text-sm">
@@ -150,6 +167,19 @@
 
           <button type="submit" class="w-full btn-primary py-3 shadow-lg shadow-indigo-500/20">
             Iniciar Sesión
+          </button>
+
+          <div class="relative my-4">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-slate-200"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-slate-500">O</span>
+            </div>
+          </div>
+
+          <button type="button" @click="loginAsGuest" class="w-full btn-secondary py-3 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            Ingresar como Invitado (Acceso Libre)
           </button>
         </form>
         
