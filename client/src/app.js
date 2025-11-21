@@ -12,6 +12,12 @@ window.app = function() {
     mensajeCarga: 'Inicializando sistemas...',
     cargandoAuth: false,
     sesionGuardada: false,
+    subject: null,
+    subjects: [
+      { id: 'technical', name: 'Technical Exam', description: 'B787 Systems & Maintenance' },
+      { id: 'amos', name: 'AMOS System', description: 'Maintenance Management Software' },
+      { id: 'english', name: 'Technical English', description: 'Aviation Terminology & Procedures' }
+    ],
     ataSeleccionado: '',
     atas: [
       { id: 21, nombre: 'Air Conditioning' },
@@ -39,18 +45,24 @@ window.app = function() {
       setTimeout(() => {
         this.cargandoAuth = false;
         this.auth.user = { name: 'User' };
-        this.vista = 'menu';
+        this.vista = 'subjects';
         this.showToast('success', 'Bienvenido a la plataforma');
       }, 1000);
     },
 
     loginAnonimo() {
       this.auth.user = { name: 'Guest' };
+      this.vista = 'subjects';
+    },
+
+    selectSubject(id) {
+      this.subject = this.subjects.find(s => s.id === id);
       this.vista = 'menu';
     },
 
     logout() {
       this.auth.user = null;
+      this.subject = null;
       this.vista = 'login';
     },
 
@@ -113,6 +125,11 @@ window.app = function() {
     
     volverAlMenu() {
       this.vista = 'menu';
+    },
+
+    volverASubjects() {
+      this.subject = null;
+      this.vista = 'subjects';
     },
 
     handleTeclado(e) {},

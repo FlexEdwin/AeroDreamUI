@@ -50,7 +50,7 @@
         <header x-show="vista !== 'cargando' && vista !== 'login'"
             class="mb-10 flex justify-between items-center border-b border-slate-800 pb-4">
             
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" @click="vista === 'menu' ? volverASubjects() : null">
                 <div class="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xs">P</div>
                 <span class="font-medium text-white tracking-tight">ProCert <span class="text-slate-500">Enterprise</span></span>
             </div>
@@ -110,8 +110,47 @@
             </div>
         </div>
 
+        <!-- VISTA: SUBJECT SELECTION (NEW) -->
+        <div x-show="vista === 'subjects'" class="flex-1 flex flex-col justify-center">
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-2">Select Question Bank</h2>
+                <p class="text-slate-500 text-sm">Choose a subject to begin your study session.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4">
+                <template x-for="subj in subjects" :key="subj.id">
+                    <button @click="selectSubject(subj.id)"
+                        class="group bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 p-6 rounded-xl text-left h-48 flex flex-col justify-between transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-slate-400 mb-4 group-hover:text-white group-hover:bg-indigo-600 transition-colors">
+                                <span class="text-sm font-bold" x-text="subj.name.charAt(0)"></span>
+                            </div>
+                            <h3 class="text-lg font-medium text-white mb-1" x-text="subj.name"></h3>
+                            <p class="text-xs text-slate-500" x-text="subj.description"></p>
+                        </div>
+                        <div class="text-xs text-slate-500 group-hover:text-indigo-400 transition-colors flex items-center gap-2">
+                            Select Bank <span class="text-lg leading-none">&rsaquo;</span>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </div>
+
         <!-- VISTA: MENU (DASHBOARD) -->
         <div x-show="vista === 'menu'" class="flex-1 flex flex-col justify-center">
+            <!-- Breadcrumb / Back -->
+            <div class="mb-6 flex items-center gap-2 text-sm text-slate-500 hover:text-white transition-colors cursor-pointer w-fit" @click="volverASubjects">
+                <span>&larr;</span>
+                <span>Back to Subjects</span>
+            </div>
+
+            <div class="mb-8 flex items-end justify-between">
+                <div>
+                    <h2 class="text-2xl font-semibold text-white mb-1" x-text="subject?.name || 'Dashboard'"></h2>
+                    <p class="text-slate-500 text-sm" x-text="subject?.description || 'Select a mode to start.'"></p>
+                </div>
+            </div>
+
             <!-- Session Alert -->
             <div x-show="sesionGuardada" @click="recuperarSesion"
                 class="mb-6 bg-slate-900 border border-slate-800 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors group">
