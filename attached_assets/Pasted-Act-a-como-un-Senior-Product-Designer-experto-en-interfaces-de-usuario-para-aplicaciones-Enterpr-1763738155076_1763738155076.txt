@@ -1,0 +1,29 @@
+Actúa como un **Senior Product Designer** experto en interfaces de usuario para aplicaciones Enterprise/SaaS.
+
+**OBJETIVO:**
+Rediseñar la interfaz de una aplicación de estudio técnico (`index.html`).
+**El estilo actual es demasiado "temático/juego" y el usuario quiere algo estrictamente PROFESIONAL, SOBRIO y MINIMALISTA.**
+
+**REFERENCIAS VISUALES:**
+Busca una estética similar a **Vercel, Linear o Notion en Dark Mode**.
+- **Paleta de Colores:** Escala de grises oscuros (`slate-900`, `slate-800`), texto blanco y gris claro (`slate-400`).
+- **Color de Acento:** Un solo color para acciones principales (ej: un Azul Eléctrico `#2563EB` o un Violeta sutil), usado con moderación. Nada de neones exagerados.
+- **Tipografía:** Inter (ya incluida). Usa pesos `font-medium` y `font-semibold` para jerarquía, evitando textos gigantes o decorativos.
+
+**CAMBIOS ESPECÍFICOS EN EL HTML:**
+
+1.  **Fondo:** Elimina imágenes de fondo de aviones. Usa un color sólido oscuro (`bg-slate-950`) o un gradiente radial extremadamente sutil y casi imperceptible.
+2.  **Tarjetas:** Elimina el efecto "Glassmorphism" exagerado (blur fuerte). Usa tarjetas limpias con fondo sólido (`bg-slate-900`), bordes muy finos (`border border-slate-800`) y sombras suaves.
+3.  **Grid de Estadísticas:**
+    - Diseño limpio y numérico.
+    - Elimina iconos grandes o emojis de "fuego/trofeo". Usa iconos SVG minimalistas (líneas finas, color gris o acento suave) o simplemente etiquetas de texto (`text-xs uppercase tracking-wider`).
+4.  **Tarjeta de Pregunta (Quiz):**
+    - **Sobriedad:** Fondo gris oscuro.
+    - **Pregunta:** Texto blanco, alineado a la izquierda (más fácil de leer), tamaño adecuado (`text-lg` o `text-xl`).
+    - **Opciones:** Botones rectangulares simples, borde gris suave. Al seleccionar, cambio de color sólido y rápido (Verde/Rojo planos, sin brillos excesivos).
+5.  **Feedback:** Elimina animaciones de "sacudida" o "pop" exageradas. Usa transiciones de color rápidas y profesionales (`duration-150`).
+
+**RESTRICCIONES TÉCNICAS:**
+1.  **NO TOQUES EL JAVASCRIPT:** La lógica `app()` y las conexiones a Supabase/Alpine deben quedar intactas.
+2.  **Archivos Locales:** Sigue apuntando a `./output.css`, `./alpine.js`, etc.
+3.  **Responsive:** El diseño debe ser 100% funcional en móvil, priorizando la legibilidad sobre la decoración.
